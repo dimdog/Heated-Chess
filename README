@@ -1,0 +1,1 @@
+This game is written in Python, and the graphics and interaction are handled in Pygame. The game logic is in piece.py, and the drawing and hooks are in game.py to play, simply execute `python game.py`
