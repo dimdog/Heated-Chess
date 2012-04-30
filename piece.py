@@ -23,13 +23,11 @@ class Piece:
     def rook_move(self,destination): #this is here as a convienence so queen can call this code too
         if self.location.x-destination.x!=0 and self.location.y-destination.y==0:
             for i in range(min(self.location.x,destination.x),max(self.location.x,destination.x)):
-                print i
                 if occupied(Point(i,self.location.y)):
                     return False
             return not occupied(destination,self.color)
         if self.location.y-destination.y!=0 and self.location.x-destination.x==0:
             for i in range(min(self.location.y,destination.y),max(self.location.y,destination.y)):
-                print i
                 if occupied(Point(self.location.x,i)):
                     return False
             return not occupied(destination,self.color)
@@ -132,9 +130,7 @@ def click(clicked, selected): # Click event!
             return True, selected
     if not selected==None:
         piece = get_piece(selected)
-        print "move? %s"%piece.move(clicked)
         if piece.move(clicked) and safe(king(turn)):
-            print "got here"
             global board
             if in_passing:
                 switch = 1
@@ -155,12 +151,10 @@ def click(clicked, selected): # Click event!
 
 def moves(locx,locy):
     global board
-    print "click:",locx, locy
     ret = []
     for x in range(8):
         for y in range(8):
             if board[locx][locy].move(Point(x+1,y+1)):
-                print "yes"
                 ret.append((x+1,y+1))
     return ret
 
@@ -201,7 +195,10 @@ def get_pieces(color=None): #returns a list of all the pieces with no arguments,
 def occupied(destination, color=None): # checks to see if destination is occupied and a piece of the opposite color, if nothing is provided, will check for any color
     piece=get_piece(destination)
     if piece:
-        return piece.color==color
+        if color==None:
+            return True
+        else:
+            return piece.color==color
     else:
         return False
 
