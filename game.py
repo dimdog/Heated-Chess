@@ -65,6 +65,7 @@ def draw(piece):
 
 selected = None
 greens = []
+turn=white
 while True:
     
     #draw checkerboard
@@ -72,10 +73,11 @@ while True:
         for y in xrange(0,board_size,step):
             switch = whiteColor if (x/step+y/step)%2==0 else blackColor
             pygame.draw.rect(windowSurfaceObj, switch, (x,y,step,step))
-    #for square in greens:
-    #    left = square[0]*step-step
-    #    top = square[1]*step-step
-    #    pygame.draw.rect(windowSurfaceObj, greenColor, (left,top,step,step))
+    if greens:
+        for square in greens:
+            left = square[0]*step-step
+            top = square[1]*step-step
+            pygame.draw.rect(windowSurfaceObj, greenColor, (left,top,step,step))
     for piece in get_pieces():
         if not piece==None:
             draw(piece)
@@ -84,7 +86,15 @@ while True:
         if event.type == MOUSEBUTTONUP:
             mousex,mousey = event.pos
             
-          #  greens = moves(min((mousex)/100+1,8),(mousey)/100+1)
-    ret_code, selected = click(Point(mousex/step+1,mousey/step+1),selected)
+            ret_code, selected = click(Point(min(mousex/step+1,8),mousey/step+1),selected,turn)
+            if selected:
+                greens = moves(selected.x,selected.y)
+            else:
+                greens = []
+            if ret_code==True and selected==None:
+                if turn==white:
+                    turn=black
+                else:
+                    turn=white
     pygame.display.update()
 

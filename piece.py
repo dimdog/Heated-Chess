@@ -103,10 +103,8 @@ class Rook(Piece):
 
 ###################
 
-
 def setup_board():
     selected=None
-    turn=white
     blacklist=[Rook(1,1,black),Rook(8,1,black),Knight(2,1,black),Knight(7,1,black),Bishop(3,1,black),Bishop(6,1,black),Queen(4,1,black),King(5,1,black)]#+ pawns
     whitelist=[Rook(1,8,white),Rook(8,8,white),Knight(2,8,white),Knight(7,8,white),Bishop(3,8,white),Bishop(6,8,white),Queen(4,8,white),King(5,8,white)]#+ pawns
     for i in range(1,9):
@@ -123,29 +121,32 @@ def setup_board():
 
 
 
-def click(clicked, selected): # Click event!
-    if occupied(clicked):
-        if selected==None and occupied(clicked,turn):
-            selected=clicked
-            return True, selected
-    if not selected==None:
-        piece = get_piece(selected)
-        if piece.move(clicked) and safe(king(turn)):
-            global board
-            if in_passing:
-                switch = 1
-                if self.color==white:
-                    switch=-1
-                board[clicked.x][clicked.y-switch]=None
+def click(clicked, selected,turn): # Click event!
+    print "white: %s",white
+    print turn
+    if occupied(clicked) and selected==None:
+        selected=clicked
+        return True, selected
+    elif selected==None:
+        return False, None 
 
-            board[clicked.x][clicked.y]=piece
-            piece.location=clicked
-            last_move=Move(selected,clicked,piece)
-            selected = None
-            return True, selected
-    selected = None
-    return False, selected
+    piece = get_piece(selected)
+    myking = king(turn)
+    assert myking
+    if piece.move(clicked) and safe(myking.location,myking.color):
+        global board
+        if in_passing:
+            switch = 1
+            if self.color==white:
+                switch=-1
+            board[clicked.x][clicked.y-switch]=None
 
+        board[clicked.x][clicked.y]=piece
+        piece.location=clicked
+        last_move=Move(selected,clicked,piece)
+        selected = None
+        return True,None
+    return False,None
 
 #################
 
