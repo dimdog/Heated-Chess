@@ -36,7 +36,13 @@ class Piece:
 
     def bishop_move(self,destination): #this is here as a convienence so queen can call this code too
         if abs(self.location.x-destination.x)==abs(self.location.y-destination.y):
-            for x,y in zip(range(min(self.location.x,destination.x),max(self.location.x,destination.x)),range(min(self.location.y,destination.y),max(self.location.y,destination.y))):
+            x_step=1
+            if self.location.x > destination.x:
+                x_step=-1
+            y_step=1
+            if self.location.y > destination.y:
+                y_step=-1
+            for x,y in zip(xrange(self.location.x+x_step,destination.x,x_step),xrange(self.location.y+y_step,destination.y,y_step)):
                 if occupied(Point(x,y)):
                     return False
             return not occupied(destination,self.color)
@@ -55,7 +61,7 @@ class Pawn(Piece):
             switch=1
 
         if self.location.y+switch==destination.y and abs(self.location.x-destination.x)==1: # attacking
-            return occupied(destination,self.color) or self.en_passent(destination,switch)
+            return occupied(destination,white==self.color) or self.en_passent(destination,switch)
         elif  self.location.x-destination.x==0: # advancing
             if self.location.y+switch==destination.y:
                 return not occupied(destination)
@@ -124,23 +130,28 @@ def setup_board():
 def click(clicked, selected,turn): # Click event!
     print "white: %s",white
     print turn
+   
     if occupied(clicked) and selected==None:
+        piece = get_piece(clicked)
+        if piece.color != turn:
+            return False, None
         selected=clicked
         return True, selected
     elif selected==None:
         return False, None 
-
+    
     piece = get_piece(selected)
     myking = king(turn)
     assert myking
     if piece.move(clicked) and safe(myking.location,myking.color):
         global board
         if in_passing:
+            print in_passing
             switch = 1
             if self.color==white:
                 switch=-1
             board[clicked.x][clicked.y-switch]=None
-
+        board[selected.x][selected.y]=None
         board[clicked.x][clicked.y]=piece
         piece.location=clicked
         last_move=Move(selected,clicked,piece)
