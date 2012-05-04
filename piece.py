@@ -9,6 +9,7 @@ turn=None
 whiteking=None
 blackking=None
 in_passing=False
+global last_move
 last_move=None
 Point = namedtuple('Point','x y')
 Move = namedtuple('Move','origin destination piece')
@@ -76,10 +77,11 @@ class Pawn(Piece):
                 return not (occupied(destination) and occupied(close_destination))
         
     def en_passent(self,destination,switch):
-        last_move=previous_move()
+        global last_move
+        global in_passing
         in_passing = False
         if last_move:
-            in_passing = isinstance(last_move.piece, Pawn) and destination.y-switch==last_move.destination.y and destination.x==last_move.x and destination.y+switch==last_move.origin
+            in_passing = isinstance(last_move.piece, Pawn) and destination.y-switch==last_move.destination.y and destination.x==last_move.destination.x and destination.y+switch==last_move.origin.y
         return in_passing
             
 
@@ -134,8 +136,6 @@ def setup_board():
 
 
 def click(clicked, selected,turn): # Click event!
-    print "white: %s",white
-    print turn
    
     if occupied(clicked) and selected==None:
         piece = get_piece(clicked)
@@ -151,15 +151,17 @@ def click(clicked, selected,turn): # Click event!
     assert myking
     if piece.move(clicked) and safe(myking.location,myking.color):
         global board
+        global in_passing
         if in_passing:
             print in_passing
             switch = 1
-            if self.color==white:
+            if piece.color==white:
                 switch=-1
             board[clicked.x][clicked.y-switch]=None
         board[selected.x][selected.y]=None
         board[clicked.x][clicked.y]=piece
         piece.location=clicked
+        global last_move
         last_move=Move(selected,clicked,piece)
         selected = None
         return True,None
