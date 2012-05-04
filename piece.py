@@ -22,12 +22,18 @@ class Piece:
     
     def rook_move(self,destination): #this is here as a convienence so queen can call this code too
         if self.location.x-destination.x!=0 and self.location.y-destination.y==0:
-            for i in range(min(self.location.x,destination.x),max(self.location.x,destination.x)):
+            x_step=1
+            if self.location.x > destination.x:
+                x_step=-1
+            for i in xrange(self.location.x+x_step,destination.x,x_step):
                 if occupied(Point(i,self.location.y)):
                     return False
             return not occupied(destination,self.color)
         if self.location.y-destination.y!=0 and self.location.x-destination.x==0:
-            for i in range(min(self.location.y,destination.y),max(self.location.y,destination.y)):
+            y_step=1
+            if self.location.y > destination.y:
+                y_step=-1
+            for i in xrange(self.location.y+y_step,destination.y,y_step):
                 if occupied(Point(self.location.x,i)):
                     return False
             return not occupied(destination,self.color)
@@ -47,7 +53,7 @@ class Piece:
                     return False
             return not occupied(destination,self.color)
         return False
-    
+
     def __str__(self):
         c = "White" if self.color==white else "Black"
         return  "%s %s"%(c, self.__class__)
