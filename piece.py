@@ -149,8 +149,9 @@ def click(clicked, selected,turn): # Click event!
     piece = get_piece(selected)
     myking = king(turn)
     assert myking
-    if piece.move(clicked) and safe(myking.location,myking.color):
+    if piece.move(clicked):
         global board
+        temp_piece = board[selected.x][selected.y]
         global in_passing
         if in_passing:
             print in_passing
@@ -161,6 +162,14 @@ def click(clicked, selected,turn): # Click event!
         board[selected.x][selected.y]=None
         board[clicked.x][clicked.y]=piece
         piece.location=clicked
+        if not safe(myking.location,myking.color):
+            board[selected.x][selected.y]=piece
+            piece.location=selected
+            if in_passing:
+                board[clicked.x][clicked.y-switch]=temp_piece        
+            else:
+                board[clicked.x][clicked.y]=temp_piece
+            return False, None
         global last_move
         last_move=Move(selected,clicked,piece)
         selected = None
