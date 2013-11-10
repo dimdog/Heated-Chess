@@ -6,7 +6,8 @@ board_size=801
 windowSurfaceObj = pygame.display.set_mode((800,800))
 pygame.display.set_caption("Chess, by Ben")
 step=100
-setup_board()
+board = Board()
+board.setup_board()
 redColor = pygame.Color(255,0,0)
 greenColor = pygame.Color(0,255,0)
 blueColor = pygame.Color(0,0,255)
@@ -41,6 +42,8 @@ def draw_loc_queen(piece):
     return (piece.location.x*100-80,piece.location.y*100-95)
 def draw(piece):
     color = None 
+    white = board.white
+    black = board.black
     if piece.color==black:
         color = greenColor
     else:
@@ -63,9 +66,9 @@ def draw(piece):
     else:
         pygame.draw.rect(windowSurfaceObj, color, (((piece.location.x-1)*step)+step/4,((piece.location.y-1)*step)+step/4,step/2,step/2))
 
-selected = None
+board.selected = None
 greens = []
-turn=white
+board.turn=board.white
 while True:
     
     #draw checkerboard
@@ -78,7 +81,7 @@ while True:
             left = square[0]*step-step
             top = square[1]*step-step
             pygame.draw.rect(windowSurfaceObj, greenColor, (left,top,step,step))
-    for piece in get_pieces():
+    for piece in board.get_pieces():
         if not piece==None:
             draw(piece)
 
@@ -86,15 +89,15 @@ while True:
         if event.type == MOUSEBUTTONUP:
             mousex,mousey = event.pos
             
-            ret_code, selected = click(Point(min(mousex/step+1,8),mousey/step+1),selected,turn)
+            ret_code, selected = board.click(Point(min(mousex/step+1,8),mousey/step+1),board.selected,board.turn)
             if selected:
-                greens = moves(selected.x,selected.y)
+                greens = board.moves(selected.x,selected.y)
             else:
                 greens = []
             if ret_code==True and selected==None:
-                if turn==white:
-                    turn=black
+                if board.turn==board.white:
+                    board.turn=board.black
                 else:
-                    turn=white
+                    board.turn=board.white
     pygame.display.update()
 
