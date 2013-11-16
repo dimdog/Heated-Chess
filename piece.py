@@ -1,12 +1,11 @@
 from collections import namedtuple
+import string
 Point = namedtuple('Point','x y')
 Move = namedtuple('Move','origin destination piece')
 class Board:
   def __init__(self):
     self.board=[[]]
     self.turn = None
-    self.whiteking=None
-    self.blackking=None
     self.in_passing=False
     self.last_move = None
     self.whitelist=None
@@ -17,19 +16,17 @@ class Board:
 
   def setup_board(self):
       self.selected=None
-      self.blacklist=[Rook(1,1,self.black,self),Rook(8,1,self.black,self),Knight(2,1,self.black,self),Knight(7,1,self.black,self),Bishop(3,1,self.black,self),Bishop(6,1,self.black,self),Queen(4,1,self.black,self),King(5,1,self.black,self)]#+ pawns
-      self.whitelist=[Rook(1,8,self.white,self),Rook(8,8,self.white,self),Knight(2,8,self.white,self),Knight(7,8,self.white,self),Bishop(3,8,self.white,self),Bishop(6,8,self.white,self),Queen(4,8,self.white,self),King(5,8,self.white,self)]#+ pawns
-      for i in range(1,9):
-          self.blacklist.append(Pawn(i,2,self.black,self))
-          self.whitelist.append(Pawn(i,7,self.white,self))
-      w, h = 9,9
+      self.whitelist=[Rook(0,0,self.white,self),Rook(7,0,self.white,self),Knight(1,0,self.white,self),Knight(6,0,self.white,self),Bishop(2,0,self.white,self),Bishop(5,0,self.white,self),Queen(3,0,self.white,self),King(4,0,self.white,self)]#+ pawns
+      self.blacklist=[Rook(0,7,self.black,self),Rook(7,7,self.black,self),Knight(1,7,self.black,self),Knight(6,7,self.black,self),Bishop(2,7,self.black,self),Bishop(5,7,self.black,self),Queen(3,7,self.black,self),King(4,7,self.black,self)]#+ pawns
+      for i in range(0,8):
+          self.whitelist.append(Pawn(i,1,self.white,self))
+          self.blacklist.append(Pawn(i,6,self.black,self))
+      w, h = 8,8
       combined = self.whitelist
       combined.extend(self.blacklist)
       self.board = [[None] * w for i in range(h)]
       for piece in combined:    
           self.board[piece.location.x][piece.location.y]=piece
-
-
 
   def click(self,clicked, selected,turn): # Click event!
      
@@ -49,7 +46,7 @@ class Board:
           temp_piece = self.board[selected.x][selected.y]
           if self.in_passing:
               switch = 1
-              if piece.color==white:
+              if piece.color==black:
                   switch=-1
               self.board[clicked.x][clicked.y-switch]=None
           self.board[self.selected.x][self.selected.y]=None
@@ -72,10 +69,10 @@ class Board:
 
   def moves(self,locx,locy):
       ret = []
-      for x in range(8):
-          for y in range(8):
-              if self.board[locx][locy].move(Point(x+1,y+1)):
-                  ret.append((x+1,y+1))
+      for x in xrange(1,9):
+          for y in xrange(1,9):
+              if self.board[locx][locy].move(Point(x,y)):
+                  ret.append((x,y))
       return ret
 
   def other_turn(self):
@@ -131,12 +128,23 @@ class Board:
               if isinstance(piece, King) and piece.color==turn:
                   return piece
       return None
-   
-  def get_piece(self, destination):
-      try:
-          return self.board[destination.x][destination.y]
-      except IndexError:
-          return None
+
+
+  def get_piece(self, destination, y=None):
+    if isinstance(destination,str):
+      x = string.uppercase.index(string.capitalize(destination[0])) 
+      y = int(destination[1])-1
+    else:
+      if y:
+        x = destination
+      else:
+        x = destination.x
+        y = destination.y
+
+    try:
+      return self.board[x][y]
+    except IndexError:
+      return None
 
 class Piece:
     def __init__(self,x,y,color,Board):

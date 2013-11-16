@@ -1,4 +1,5 @@
 import pygame, sys
+import string
 from pygame.locals import *
 from piece import *
 pygame.init()
@@ -31,15 +32,15 @@ black_rook = pygame.image.load('pieces/black_rook.png')
 white_queen = pygame.image.load('pieces/white_queen.png')
 black_queen = pygame.image.load('pieces/black_queen.png')
 def draw_loc_pawn(piece):
-    return (piece.location.x*100-70,piece.location.y*100-80)
+    return ((piece.location.x+1)*100-70,(piece.location.y+1)*100-80)
 def draw_loc_knight(piece):
-    return (piece.location.x*100-85,piece.location.y*100-95)
+    return ((piece.location.x+1)*100-85,(piece.location.y+1)*100-95)
 def draw_loc_bishop(piece):
-    return (piece.location.x*100-80,piece.location.y*100-95)
+    return ((piece.location.x+1)*100-80,(piece.location.y+1)*100-95)
 def draw_loc_rook(piece):
-    return (piece.location.x*100-80,piece.location.y*100-95)
+    return ((piece.location.x+1)*100-80,(piece.location.y+1)*100-95)
 def draw_loc_queen(piece):
-    return (piece.location.x*100-80,piece.location.y*100-95)
+    return ((piece.location.x+1)*100-80,(piece.location.y+1)*100-95)
 def draw(piece):
     color = None 
     white = board.white
@@ -69,35 +70,44 @@ def draw(piece):
 board.selected = None
 greens = []
 board.turn=board.white
+def click_event(click_location):
+  pass
+
+def click_to_loc(click_location):
+  mousex,mousey = click_location
+  #normalize from pixels
+  x = mousex/step
+  y = mousey/step   
+  # convert to chess format 
+  x=string.ascii_uppercase[x]
+  y=y+1
+  
+  print "%s%s"%(x,y)
+
+  
 while True:
     
-    #draw checkerboard
-    for x in xrange(0,board_size,step):
-        for y in xrange(0,board_size,step):
-            switch = whiteColor if (x/step+y/step)%2==0 else blackColor
-            pygame.draw.rect(windowSurfaceObj, switch, (x,y,step,step))
-    if greens:
-        for square in greens:
-            left = square[0]*step-step
-            top = square[1]*step-step
-            pygame.draw.rect(windowSurfaceObj, greenColor, (left,top,step,step))
-    for piece in board.get_pieces():
-        if not piece==None:
-            draw(piece)
+  #draw checkerboard
+  for x in xrange(0,board_size,step):
+    for y in xrange(0,board_size,step):
+      switch = whiteColor if (x/step+y/step)%2==0 else blackColor
+      pygame.draw.rect(windowSurfaceObj, switch, (x,y,step,step))
+  if greens:
+    for square in greens:
+      left = square[0]*step-step
+      top = square[1]*step-step
+      pygame.draw.rect(windowSurfaceObj, greenColor, (left,top,step,step))
+  for piece in board.get_pieces():
+    if not piece==None:
+      draw(piece)
 
-    for event in pygame.event.get():
-        if event.type == MOUSEBUTTONUP:
-            mousex,mousey = event.pos
-            
-            ret_code, selected = board.click(Point(min(mousex/step+1,8),mousey/step+1),board.selected,board.turn)
-            if selected:
-                greens = board.moves(selected.x,selected.y)
-            else:
-                greens = []
-            if ret_code==True and selected==None:
-                if board.turn==board.white:
-                    board.turn=board.black
-                else:
-                    board.turn=board.white
-    pygame.display.update()
-
+  for event in pygame.event.get():
+    if event.type == MOUSEBUTTONUP:
+      point = click_to_loc(event.pos)
+#     ret_code, selected = board.click(click)
+#     if selected:
+#       greens = board.moves(selected.x,selected.y)
+#       print greens
+#     else:
+#       greens = []
+  pygame.display.update()
