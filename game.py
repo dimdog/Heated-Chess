@@ -104,10 +104,6 @@ while True:
   for event in pygame.event.get():
     if event.type == MOUSEBUTTONUP:
       point = click_to_loc(event.pos)
-#     ret_code, selected = board.click(click)
-#     if selected:
-#       greens = board.moves(selected.x,selected.y)
-#       print greens
-#     else:
-#       greens = []
+      greens = board.click(point)
+
   pygame.display.update()

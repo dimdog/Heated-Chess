@@ -1,4 +1,5 @@
 from piece import *
+from board import *
 import unittest
 
 class TestChess(unittest.TestCase):
@@ -13,12 +14,15 @@ class TestChess(unittest.TestCase):
       self.assertEqual(self.board.get_piece(pos).color, color)
       
     self.board.setup_board()
+    print self.board
     white = self.board.white
     black = self.board.black
     #pawns!
     for column in ['a%s','b%s','c%s','d%s','e%s','f%s','g%s','h%s']:
       self.assertEqual(isinstance(self.board.get_piece(column%2), Pawn), True)
       self.assertEqual(self.board.get_piece(column%2).color, white)
+      print "Pass: %s"%column%2
+
       self.assertEqual(isinstance(self.board.get_piece(column%7), Pawn), True)
       self.assertEqual(self.board.get_piece(column%7).color, black)
     #rooks!
@@ -45,4 +49,5 @@ class TestChess(unittest.TestCase):
      
   def test_pawn(self):
     self.board.setup_board()
+    print self.board.moves()
     
