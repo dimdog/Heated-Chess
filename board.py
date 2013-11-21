@@ -6,25 +6,45 @@ class Board:
     self.turn = None
     self.in_passing=False
     self.last_move = None
-    self.whitelist=None
-    self.blacklist=None
     self.black=1
     self.white=0
     self.selected = None
 
+  def add_piece(self,piece, location, color):
+      x,y = self.translate(location)
+      my_piece = piece(location, color, self)
+      self.board[x][y]=my_piece
+
   def setup_board(self):
-      self.selected=None
-      self.whitelist=[Rook(0,0,self.white,self),Rook(7,0,self.white,self),Knight(1,0,self.white,self),Knight(6,0,self.white,self),Bishop(2,0,self.white,self),Bishop(5,0,self.white,self),Queen(3,0,self.white,self),King(4,0,self.white,self)]#+ pawns
-      self.blacklist=[Rook(0,7,self.black,self),Rook(7,7,self.black,self),Knight(1,7,self.black,self),Knight(6,7,self.black,self),Bishop(2,7,self.black,self),Bishop(5,7,self.black,self),Queen(3,7,self.black,self),King(4,7,self.black,self)]#+ pawns
-      for i in range(0,8):
-          self.whitelist.append(Pawn(i,1,self.white,self))
-          self.blacklist.append(Pawn(i,6,self.black,self))
       w, h = 8,8
-      combined = self.whitelist
-      combined.extend(self.blacklist)
       self.board = [[None] * w for i in range(h)]
-      for piece in combined:    
-          self.board[piece.x][piece.y]=piece
+      self.selected=None
+      #Rooks
+      self.add_piece(Rook,"A1",self.white)
+      self.add_piece(Rook,"H1",self.white)
+      self.add_piece(Rook,"A8",self.black)
+      self.add_piece(Rook,"H8",self.black)
+      #Knights
+      self.add_piece(Knight,"B1",self.white)
+      self.add_piece(Knight,"G1",self.white)
+      self.add_piece(Knight,"B8",self.black)
+      self.add_piece(Knight,"G8",self.black)
+      #Bishops
+      self.add_piece(Bishop,"C1",self.white)
+      self.add_piece(Bishop,"F1",self.white)
+      self.add_piece(Bishop,"C8",self.black)
+      self.add_piece(Bishop,"F8",self.black)
+      #Queens
+      self.add_piece(Queen,"D1",self.white)
+      self.add_piece(Queen,"D8",self.black)
+      #Kings
+      self.add_piece(King,"E1",self.white)
+      self.add_piece(King,"E8",self.black)
+    
+  
+      for i in range(0,8):
+          self.add_piece(Pawn,"%s2"%string.ascii_uppercase[i],self.white)
+          self.add_piece(Pawn,"%s7"%string.ascii_uppercase[i],self.black)
 
   def click(self,clicked): # Click event!
      
@@ -65,15 +85,29 @@ class Board:
 
   def moves(self):
       ret = {}
-      pieces = self.whitelist + self.blacklist
+      pieces = self.get_pieces() 
       for piece in pieces:
         ret[piece.location()] = { 'color' : piece.color, 'moves' : piece.moves() }
       return ret
 
+  def move(self, origin, destination, moves=None): #Called like: move("E2","E4")
+      piece = self.get_piece(origin)
+      if not piece:
+        return False, "No piece to move!"
+      if self.turn == piece.color:
+        return False, "Not your turn!"
+      if not moves:
+        moves = self.moves()
+      if destination in moves[origin]['moves']:
+        dest_x,dest_y = self.translate(destination)
+        self.board[piece.x][piece.y] = None
+        self.board[dest_x][dest_y] = piece
+      return True
+
   def other_turn(self):
-      if self.turn==white:
-          return black
-      return white
+      if self.turn==self.white:
+          return self.black
+      return self.white
 
 
   def safe(self,destination, color): # checks to see if a destination is under threat from a piece of the opposite color
@@ -83,29 +117,34 @@ class Board:
                   return False
       return True
 
-  def get_pieces(self,color=None): #returns a list of all the pieces with no arguments, and all pieces of the opposite color if given a color)
-      black = self.black
-      self.whitelist = self.blacklist = combined = []
+  def get_pieces(self,color=None): #returns a list of all the pieces with no arguments, and all pieces of the color if given a color)
+      print "Get pieces... %s"%color
+      white = self.white
+      whitelist = blacklist = combined = []
       for row in self.board:
           for piece in row:
               if isinstance(piece, Piece):
+                  print "color is: %s"%color
                   if color==None:
                       combined.append(piece)
+                      print "None..."
                   else:
-                      if piece.color == black:
-                          self.blacklist.append(piece)
+                      if piece.color == white:
+                          print "white"
+                          whitelist.append(piece)
                       else:
-                          self.whitelist.append(piece)
+                          print "black"
+                          blacklist.append(piece)
 
       if color==None:
           return combined
-      if color==black:
-          return self.whitelist
+      elif color==white:
+          return whitelist
       else:
-          return self.blacklist
+          return blacklist
 
-  def occupied(self,destination, color=None): # checks to see if destination is occupied and a piece of the opposite color, if nothing is provided, will check for any color
-      piece=self.get_piece(destination)
+  def occupied(self,x,y, color=None): # checks to see if destination is occupied and a piece of the opposite color, if nothing is provided, will check for any color
+      piece=self.get_piece(x,y)
       if piece:
           if color==None:
               return True
@@ -141,9 +180,9 @@ class Board:
       return None
     
   def translate(self, code, y=None):
-    if y:
-      return "%s%d"%(string.ascii_uppercase[code], y) 
-    return string.uppercase.index(string.capitalize(code[0])), int(code[1])
+    if y or y==0:
+      return "%s%d"%(string.ascii_uppercase[code], y+1) 
+    return string.uppercase.index(string.capitalize(code[0])), int(code[1])-1
       
 
   def __str__(self):

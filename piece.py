@@ -3,18 +3,20 @@ import string
 Move = namedtuple('Move','origin destination piece')
 
 class Piece:
-    def __init__(self,x,y,color,Board):
-      self.x = x
-      self.y = y
+    def __init__(self,code,color,Board):
+      self.Board=Board
+      self.x, self.y = self.rev_location(code)
       self.color=color
       self.moved = False
-      self.Board=Board
 
     def location(self):
-      return "%s%d"%(string.ascii_uppercase[self.x], self.y)
-    
+      return self.Board.translate(self.x,self.y) 
+
+    def rev_location(self, code):
+      return self.Board.translate(code)      
+
     def square(self,destination):
-      return ((1 <= destination.x <= 8) and (1 <= destination.y <= 8))
+      return ((0 <= destination.x <= 7) and (0 <= destination.y <= 7))
     
     def rook_move(self,destination): #this is here as a convienence so queen can call this code too
       if self.x-destination.x!=0 and self.y-destination.y==0:
@@ -77,6 +79,7 @@ class Pawn(Piece):
       if self.Board.occupied(self.x-1, self.y+switch, self.color):
         ret.append(self.Board.translate(self.x-1, self.y+switch))
       #TODO en passent
+    return ret
             
       
     
