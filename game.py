@@ -24,6 +24,16 @@ class HeatedChess:
   black_queen = pygame.image.load('pieces/black_queen.png')
   #KING
   #TODO
+  
+  def legalSquares(self):
+    moves = set() 
+    for move in self.board.generate_legal_moves():
+      if len(str(move))>4:
+        continue
+      moves.add(str(move)[:2])
+    return moves
+       
+    
 
   def getRowsColumns(self):
     rows = self.rows
@@ -113,9 +123,9 @@ class HeatedChess:
 
       if len(clicks) == 0:
         self.drawMoves(windowSurfaceObj, self.generateMoves())
-        self.board.turn = not self.board.turn
+        self.board.push(None)
         self.drawThreats(windowSurfaceObj, self.generateMoves())
-        self.board.turn = not self.board.turn
+        self.board.pop()
       if len(clicks) == 1:
         self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
 
@@ -124,7 +134,11 @@ class HeatedChess:
         if event.type == MOUSEBUTTONUP:
           assert self.getSquare(*event.pos) == self.getSquare(*self.getCoords(self.getSquare(*event.pos)))
           if len(clicks)==0:
-            clicks.append(self.getSquare(*event.pos)) 
+            square = self.getSquare(*event.pos) 
+            print square
+            print self.legalSquares()
+            if square.lower() in self.legalSquares():
+              clicks.append(square)
           else:
             move = chess.Move( getattr(chess, clicks[0]), getattr(chess, self.getSquare(*event.pos)))
             clicks = []
