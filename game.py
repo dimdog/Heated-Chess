@@ -2,17 +2,21 @@ from collections import defaultdict
 import pygame, sys, chess
 from pygame.locals import *
 
+
 class ColorTuple(object):
   def __init__(self):
     self.r = 0
-    self.g = 20
+    self.g = 0
     self.b = 0
+
 
 class HeatedChess:
   columns = ["A","B","C","D","E","F","G","H"] 
   rows = [8,7,6,5,4,3,2,1]
   whiteColor = pygame.Color(255,255,255)
   blackColor = pygame.Color(0,0,0)
+  redColor = pygame.Color(200,0,0)
+  blueColor = pygame.Color(0,0,200)
   #PAWN
   white_pawn = pygame.image.load('pieces/white_pawn.png')
   black_pawn = pygame.image.load('pieces/black_pawn.png')
@@ -110,6 +114,7 @@ class HeatedChess:
     return ( column_index*self.step,row_index*self.step)
 
   def generateThreatsSupports(self):
+    """ generates two dictionaries, ordered depending on who's turn it is, of the squares that each piece is either attacking or supporting as the key, and the number of pieces that can hit it as the value, partitioned on color """ 
     white_moves = defaultdict(int)
     black_moves = defaultdict(int)
     for row in self.rows:
@@ -152,6 +157,43 @@ class HeatedChess:
 
     return moves 
       
+  def drawProportional(self, windowSurfaceObj, supports, threats):
+    """ draws proportionally divided squares based on power available on the square"""
+    results = defaultdict(float)
+    squares = set()
+    squares.update(supports.keys())
+    squares.update(threats.keys())
+    for key in squares:
+      threat = threats[key]
+      support = supports[key]
+      if key=="H6":
+        print "Threat:%s, support:%s"%(threat, support)
+      if support == 0 and threat == 0: #nobody has anything on this. Nothing on the threat board
+        pass 
+      elif support == 0: # no support, full enemy
+        results[key] = 0.0
+      elif threat == 0 : # no enemy, full support 
+        results[key] = 1.0
+      elif threat == support: #equal
+        results[key] = 0.5
+      elif threat > support: #mostly enemy 
+        results[key] = float(support)/threat
+      else: #mostly support 
+        results[key] = float(threat)/support
+
+    print results["H6"]
+    for key, value in results.items():
+      self._drawProportion(windowSurfaceObj, key, value, 1.0-value)
+      
+
+  def _drawProportion(self, windowSurfaceObj, squareName, supportAmount, threatAmount):
+      x, y = self.getCoords(squareName)
+      
+      if threatAmount!=0:
+        pygame.draw.rect(windowSurfaceObj, self.redColor, (x,y,self.step,self.step*threatAmount))
+      if supportAmount!=0:
+        pygame.draw.rect(windowSurfaceObj, self.blueColor, (x,y+(self.step*threatAmount),self.step,self.step*supportAmount))
+  
   def drawBlend(self, windowSurfaceObj, moves, threats):
     results = defaultdict(ColorTuple)
     for key, value in moves.items():
@@ -202,12 +244,9 @@ class HeatedChess:
       self.drawCheckerboard(windowSurfaceObj)
 
       if len(clicks) == 0:
-        #moves = self.generateMoves() 
-        #self.board.push(None)
-        #threats = self.generateMoves()
-        #self.board.pop()
         threats, supports = self.generateThreatsSupports()
-        self.drawBlend(windowSurfaceObj, supports, threats)
+        #self.drawBlend(windowSurfaceObj, supports, threats)
+        self.drawProportional(windowSurfaceObj, supports, threats)
       if len(clicks) == 1:
         self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
 
