@@ -109,7 +109,27 @@ class HeatedChess:
     row_index = rows.index(row)
     return ( column_index*self.step,row_index*self.step)
 
+  def generateThreatsSupports(self):
+    white_moves = defaultdict(int)
+    black_moves = defaultdict(int)
+    for row in self.rows:
+      for column in self.columns:
+        target_square = getattr(chess, "%s%s"%(column, row))
+
+        for dest_square_int in self.board.attackers(chess.WHITE, target_square):
+          white_moves[chess.SQUARE_NAMES[dest_square_int].upper()]+=1
+        for dest_square_int in self.board.attackers(chess.BLACK, target_square):
+          black_moves[chess.SQUARE_NAMES[dest_square_int].upper()]+=1
+        
+
+    if self.board.turn == chess.WHITE:
+      return black_moves, white_moves
+    return white_moves, black_moves
+    
+        
+
   def generateMoves(self):
+    """ generates a dictionary of legal destinations and the number of pieces that can move there """
     moves = defaultdict(int)
     for move in self.board.generate_legal_moves():
       if len(str(move))>4:
@@ -179,11 +199,12 @@ class HeatedChess:
       self.drawCheckerboard(windowSurfaceObj)
 
       if len(clicks) == 0:
-        moves = self.generateMoves() 
-        self.board.push(None)
-        threats = self.generateMoves()
-        self.board.pop()
-        self.drawBlend(windowSurfaceObj, moves, threats)
+        #moves = self.generateMoves() 
+        #self.board.push(None)
+        #threats = self.generateMoves()
+        #self.board.pop()
+        threats, supports = self.generateThreatsSupports()
+        self.drawBlend(windowSurfaceObj, supports, threats)
       if len(clicks) == 1:
         self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
 
