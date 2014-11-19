@@ -2,6 +2,12 @@ from collections import defaultdict
 import pygame, sys, chess
 from pygame.locals import *
 
+class ColorTuple(object):
+  def __init__(self):
+    self.r = 0
+    self.g = 20
+    self.b = 0
+
 class HeatedChess:
   columns = ["A","B","C","D","E","F","G","H"] 
   rows = [8,7,6,5,4,3,2,1]
@@ -123,17 +129,17 @@ class HeatedChess:
 
     return moves 
       
-  def drawMoves(self, windowSurfaceObj, moves): 
-    for square in moves:
-      x,y = self.getCoords(square)
-      color = pygame.Color(20,20,40*moves[square]) 
-      pygame.draw.rect(windowSurfaceObj, color, (x,y,self.step,self.step))
-      
-  def drawThreats(self, windowSurfaceObj, moves): 
-    for square in moves:
-      x,y = self.getCoords(square)
-      color = pygame.Color(150+20*moves[square],20,20) 
-      pygame.draw.rect(windowSurfaceObj, color, (x,y,self.step,self.step))
+  def drawBlend(self, windowSurfaceObj, moves, threats):
+    results = defaultdict(ColorTuple)
+    for key, value in moves.items():
+      results[key].b=min(100+(40*value),255)
+
+    for key,value in threats.items():
+      results[key].r=min(100+(40*value),255)
+
+    for key, value in results.items():
+      x, y = self.getCoords(key)
+      pygame.draw.rect(windowSurfaceObj, pygame.Color(value.r, value.g, value.b), (x,y,self.step,self.step))
       
   def drawOptions(self, windowSurfaceObj, moves): 
     for square in moves:
@@ -173,10 +179,11 @@ class HeatedChess:
       self.drawCheckerboard(windowSurfaceObj)
 
       if len(clicks) == 0:
-        self.drawMoves(windowSurfaceObj, self.generateMoves())
+        moves = self.generateMoves() 
         self.board.push(None)
-        self.drawThreats(windowSurfaceObj, self.generateMoves())
+        threats = self.generateMoves()
         self.board.pop()
+        self.drawBlend(windowSurfaceObj, moves, threats)
       if len(clicks) == 1:
         self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
 
