@@ -53,13 +53,21 @@ class HeatedChess:
 
   def generateMoves(self):
     moves = defaultdict(int)
-    print "Legal Moves:"
     for move in self.board.generate_legal_moves():
       if len(str(move))>4:
         continue
-      print "\t%s"%move
       dest = str(move)[-2:].upper()
       moves[dest]+=1
+
+    return moves 
+      
+  def generateOptions(self, square):
+    moves = [] 
+    for move in self.board.generate_legal_moves():
+      if len(str(move))>4:
+        continue
+      if str(move)[:2].upper()==square:
+        moves.append(str(move)[-2:].upper())
 
     return moves 
       
@@ -72,7 +80,13 @@ class HeatedChess:
   def drawThreats(self, windowSurfaceObj, moves): 
     for square in moves:
       x,y = self.getCoords(square)
-      color = pygame.Color(40*moves[square],20,20) 
+      color = pygame.Color(150+20*moves[square],20,20) 
+      pygame.draw.rect(windowSurfaceObj, color, (x,y,self.step,self.step))
+      
+  def drawOptions(self, windowSurfaceObj, moves): 
+    for square in moves:
+      x,y = self.getCoords(square)
+      color = pygame.Color(20,200,20) 
       pygame.draw.rect(windowSurfaceObj, color, (x,y,self.step,self.step))
       
       
@@ -98,21 +112,30 @@ class HeatedChess:
     while True:
       self.drawCheckerboard(windowSurfaceObj)
 
-      if len(clicks) == 0:
+      if len(clicks) == 1:
         self.drawMoves(windowSurfaceObj, self.generateMoves())
         self.board.turn = not self.board.turn
         self.drawThreats(windowSurfaceObj, self.generateMoves())
         self.board.turn = not self.board.turn
+      if len(clicks) == 2:
+        self.drawOptions(windowSurfaceObj, self.generateOptions())
+
 
       for event in pygame.event.get():
         if event.type == MOUSEBUTTONUP:
           assert self.getSquare(*event.pos) == self.getSquare(*self.getCoords(self.getSquare(*event.pos)))
           if len(clicks)==0:
             clicks.append(self.getSquare(*event.pos)) 
+          elif len(clicks)==1:
+            clicks.append(self.getSquare(*event.pos)) 
+            
           else:
             move = chess.Move( getattr(chess, clicks[0]), getattr(chess, self.getSquare(*event.pos)))
             clicks = []
-            self.board.push(move)
+            if self.board.is_legal(move):
+              res = self.board.push(move)
+            
+            
             
 
       pygame.display.update()
