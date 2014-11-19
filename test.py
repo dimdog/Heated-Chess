@@ -59,6 +59,8 @@ class TestChess(unittest.TestCase):
      
   def test_get_pieces(self):
     self.board.setup_board()
+    print self.board
+    return False
     pieces = self.board.get_pieces()
     white_pieces = self.board.get_pieces(self.board.white)
     black_pieces = self.board.get_pieces(self.board.black)
