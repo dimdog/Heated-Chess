@@ -53,6 +53,20 @@ class HeatedChess:
     ret["D8"] = self.black_queen
 
     return ret 
+
+  def offsetImage(self, coords, img):
+    if img == self.white_pawn or img == self.black_pawn:
+      coords = (coords[0]+25, coords[1]+15)
+    elif img == self.white_rook or img == self.black_rook:
+      coords = (coords[0]+22, coords[1]+5)
+    elif img == self.white_knight or img == self.black_knight:
+      coords = (coords[0]+12, coords[1]+5)
+    elif img == self.white_bishop or img == self.black_bishop:
+      coords = (coords[0]+22, coords[1]+5)
+    elif img == self.white_queen or img == self.black_queen:
+      coords = (coords[0]+25, coords[1])
+
+    return coords
   
   def legalSquares(self):
     moves = set() 
@@ -138,7 +152,9 @@ class HeatedChess:
 
   def drawPieces(self, windowSurfaceObj):
     for square, img in self.pieces.items():
-      windowSurfaceObj.blit(img, self.getCoords(square))
+      coords = self.getCoords(square)
+      coords = self.offsetImage(coords, img)
+      windowSurfaceObj.blit(img, coords) 
       
 
   def __init__(self):
