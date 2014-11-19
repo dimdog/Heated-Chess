@@ -1,9 +1,12 @@
+from collections import defaultdict
 import pygame, sys, chess
 from pygame.locals import *
 
 class HeatedChess:
   columns = ["A","B","C","D","E","F","G","H"] 
   rows = [8,7,6,5,4,3,2,1]
+  whiteColor = pygame.Color(255,255,255)
+  blackColor = pygame.Color(0,0,0)
   #PAWN
   white_pawn = pygame.image.load('pieces/white_pawn.png')
   black_pawn = pygame.image.load('pieces/black_pawn.png')
@@ -42,11 +45,37 @@ class HeatedChess:
     """ takes in SAN (A1, H8, etc) and returns the top left corner of the corresponding square"""
     rows, columns = self.getRowsColumns()
     column, row = san # subtly this splits the string `san` into A and 8, for example.
+    print san
     row = int(row) # cast it to int
     column_index = columns.index(column)
     row_index = rows.index(row)
     return ( column_index*self.step,row_index*self.step)
-    
+
+  def generateMoves(self):
+    moves = defaultdict(int)
+    print "Legal Moves:"
+    for move in self.board.generate_legal_moves():
+      if len(str(move))>4:
+        continue
+      print "\t%s"%move
+      dest = str(move)[-2:].upper()
+      moves[dest]+=1
+
+    return moves 
+      
+  def drawMoves(self, windowSurfaceObj, moves): 
+    for square in moves:
+      x,y = self.getCoords(square)
+      color = pygame.Color(20,20,40*moves[square]) 
+      pygame.draw.rect(windowSurfaceObj, color, (x,y,self.step,self.step))
+      
+  def drawThreats(self, windowSurfaceObj, moves): 
+    for square in moves:
+      x,y = self.getCoords(square)
+      color = pygame.Color(40*moves[square],20,20) 
+      pygame.draw.rect(windowSurfaceObj, color, (x,y,self.step,self.step))
+      
+      
   def drawCheckerboard(self, windowSurfaceObj):
     white = self.whiteColor
     black = self.blackColor
@@ -59,18 +88,32 @@ class HeatedChess:
     self.whiteAtBottom = True 
     self.board_size=801
     self.step=100
-    self.whiteColor = pygame.Color(255,255,255)
-    self.blackColor = pygame.Color(0,0,0)
 
-    board = chess.Bitboard()
+    self.board = chess.Bitboard()
     pygame.init()
     windowSurfaceObj = pygame.display.set_mode((self.board_size,self.board_size))
     pygame.display.set_caption("Chess Take 2, by Ben")
+
+    clicks = []
     while True:
       self.drawCheckerboard(windowSurfaceObj)
+
+      if len(clicks) == 0:
+        self.drawMoves(windowSurfaceObj, self.generateMoves())
+        self.board.turn = not self.board.turn
+        self.drawThreats(windowSurfaceObj, self.generateMoves())
+        self.board.turn = not self.board.turn
+
       for event in pygame.event.get():
         if event.type == MOUSEBUTTONUP:
           assert self.getSquare(*event.pos) == self.getSquare(*self.getCoords(self.getSquare(*event.pos)))
+          if len(clicks)==0:
+            clicks.append(self.getSquare(*event.pos)) 
+          else:
+            move = chess.Move( getattr(chess, clicks[0]), getattr(chess, self.getSquare(*event.pos)))
+            clicks = []
+            self.board.push(move)
+            
 
       pygame.display.update()
 
