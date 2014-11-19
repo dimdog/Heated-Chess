@@ -114,12 +114,15 @@ class HeatedChess:
     black_moves = defaultdict(int)
     for row in self.rows:
       for column in self.columns:
-        target_square = getattr(chess, "%s%s"%(column, row))
+        square_name = "%s%s"%(column, row)
+        target_square = getattr(chess, square_name) 
 
         for dest_square_int in self.board.attackers(chess.WHITE, target_square):
-          white_moves[chess.SQUARE_NAMES[dest_square_int].upper()]+=1
+          # white_moves[chess.SQUARE_NAMES[dest_square_int].upper()]+=1
+          white_moves[square_name]+=1
         for dest_square_int in self.board.attackers(chess.BLACK, target_square):
-          black_moves[chess.SQUARE_NAMES[dest_square_int].upper()]+=1
+          #black_moves[chess.SQUARE_NAMES[dest_square_int].upper()]+=1
+          black_moves[square_name]+=1
         
 
     if self.board.turn == chess.WHITE:
@@ -152,10 +155,10 @@ class HeatedChess:
   def drawBlend(self, windowSurfaceObj, moves, threats):
     results = defaultdict(ColorTuple)
     for key, value in moves.items():
-      results[key].b=min(100+(40*value),255)
+      results[key].b=min(40*value,255)
 
     for key,value in threats.items():
-      results[key].r=min(100+(40*value),255)
+      results[key].r=min(40*value,255)
 
     for key, value in results.items():
       x, y = self.getCoords(key)
@@ -226,6 +229,7 @@ class HeatedChess:
             if self.board.is_legal(move):
               self.pieces[dest] = self.pieces.pop(origin)
               self.board.push(move)
+              self.whiteAtBottom = not self.whiteAtBottom
             
             
             
