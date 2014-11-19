@@ -24,6 +24,35 @@ class HeatedChess:
   black_queen = pygame.image.load('pieces/black_queen.png')
   #KING
   #TODO
+
+  def originalPieces(self):
+    ret = {} 
+    #PAWNS
+    for col in self.columns:
+      ret["%s2"%col] = self.white_pawn
+    for col in self.columns:
+      ret["%s7"%col] = self.black_pawn
+    #ROOKS
+    ret["A1"] = self.white_rook
+    ret["H1"] = self.white_rook
+    ret["A8"] = self.black_rook
+    ret["H8"] = self.black_rook
+    #KNIGHTS
+    ret["B1"] = self.white_knight
+    ret["G1"] = self.white_knight
+    ret["B8"] = self.black_knight
+    ret["G8"] = self.black_knight
+    #BISHOPS
+    ret["C1"] = self.white_bishop
+    ret["F1"] = self.white_bishop
+    ret["C8"] = self.black_bishop
+    ret["F8"] = self.black_bishop
+    #King
+    #Queen
+    ret["D1"] = self.white_queen
+    ret["D8"] = self.black_queen
+
+    return ret 
   
   def legalSquares(self):
     moves = set() 
@@ -107,10 +136,16 @@ class HeatedChess:
         switch = white if (x/self.step+y/self.step)%2==0 else black
         pygame.draw.rect(windowSurfaceObj, switch, (x,y,self.step,self.step))
 
+  def drawPieces(self, windowSurfaceObj):
+    for square, img in self.pieces.items():
+      windowSurfaceObj.blit(img, self.getCoords(square))
+      
+
   def __init__(self):
     self.whiteAtBottom = True 
     self.board_size=801
     self.step=100
+    self.pieces = self.originalPieces()
 
     self.board = chess.Bitboard()
     pygame.init()
@@ -129,21 +164,24 @@ class HeatedChess:
       if len(clicks) == 1:
         self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
 
+      self.drawPieces(windowSurfaceObj)
+
 
       for event in pygame.event.get():
         if event.type == MOUSEBUTTONUP:
           assert self.getSquare(*event.pos) == self.getSquare(*self.getCoords(self.getSquare(*event.pos)))
           if len(clicks)==0:
             square = self.getSquare(*event.pos) 
-            print square
-            print self.legalSquares()
             if square.lower() in self.legalSquares():
               clicks.append(square)
           else:
-            move = chess.Move( getattr(chess, clicks[0]), getattr(chess, self.getSquare(*event.pos)))
+            origin = clicks[0]
+            dest = self.getSquare(*event.pos)
+            move = chess.Move( getattr(chess, clicks[0]), getattr(chess, dest))
             clicks = []
             if self.board.is_legal(move):
-              res = self.board.push(move)
+              self.pieces[dest] = self.pieces.pop(origin)
+              self.board.push(move)
             
             
             
