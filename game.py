@@ -168,18 +168,7 @@ class HeatedChess:
       support = supports[key]
       if key=="H6":
         print "Threat:%s, support:%s"%(threat, support)
-      if support == 0 and threat == 0: #nobody has anything on this. Nothing on the threat board
-        pass 
-      elif support == 0: # no support, full enemy
-        results[key] = 0.0
-      elif threat == 0 : # no enemy, full support 
-        results[key] = 1.0
-      elif threat == support: #equal
-        results[key] = 0.5
-      elif threat > support: #mostly enemy 
-        results[key] = float(support)/threat
-      else: #mostly support 
-        results[key] = float(threat)/support
+      results[key] = float(support)/(support+threat)
 
     print results["H6"]
     for key, value in results.items():
