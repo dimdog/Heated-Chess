@@ -45,7 +45,6 @@ class HeatedChess:
     """ takes in SAN (A1, H8, etc) and returns the top left corner of the corresponding square"""
     rows, columns = self.getRowsColumns()
     column, row = san # subtly this splits the string `san` into A and 8, for example.
-    print san
     row = int(row) # cast it to int
     column_index = columns.index(column)
     row_index = rows.index(row)
@@ -112,13 +111,13 @@ class HeatedChess:
     while True:
       self.drawCheckerboard(windowSurfaceObj)
 
-      if len(clicks) == 1:
+      if len(clicks) == 0:
         self.drawMoves(windowSurfaceObj, self.generateMoves())
         self.board.turn = not self.board.turn
         self.drawThreats(windowSurfaceObj, self.generateMoves())
         self.board.turn = not self.board.turn
-      if len(clicks) == 2:
-        self.drawOptions(windowSurfaceObj, self.generateOptions())
+      if len(clicks) == 1:
+        self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
 
 
       for event in pygame.event.get():
@@ -126,9 +125,6 @@ class HeatedChess:
           assert self.getSquare(*event.pos) == self.getSquare(*self.getCoords(self.getSquare(*event.pos)))
           if len(clicks)==0:
             clicks.append(self.getSquare(*event.pos)) 
-          elif len(clicks)==1:
-            clicks.append(self.getSquare(*event.pos)) 
-            
           else:
             move = chess.Move( getattr(chess, clicks[0]), getattr(chess, self.getSquare(*event.pos)))
             clicks = []
