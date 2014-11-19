@@ -1,109 +1,215 @@
-import pygame, sys
-import string
+from collections import defaultdict
+import pygame, sys, chess
 from pygame.locals import *
-from piece import *
-pygame.init()
-board_size=801
-windowSurfaceObj = pygame.display.set_mode((800,800))
-pygame.display.set_caption("Chess, by Ben")
-step=100
-board = Board()
-board.setup_board()
-redColor = pygame.Color(255,0,0)
-greenColor = pygame.Color(0,255,0)
-blueColor = pygame.Color(0,0,255)
 
-whiteColor = pygame.Color(255,255,255)
-blackColor = pygame.Color(0,0,0)
-#PIECES
-#PAWN
-white_pawn = pygame.image.load('pieces/white_pawn.png')
-black_pawn = pygame.image.load('pieces/black_pawn.png')
-#KNIGHT
-white_knight = pygame.image.load('pieces/white_knight.png')
-black_knight = pygame.image.load('pieces/black_knight.png')
-#BISHOP
-white_bishop = pygame.image.load('pieces/white_bishop.png')
-black_bishop = pygame.image.load('pieces/black_bishop.png')
-#ROOK
-white_rook = pygame.image.load('pieces/white_rook.png')
-black_rook = pygame.image.load('pieces/black_rook.png')
-#QUEEN
-white_queen = pygame.image.load('pieces/white_queen.png')
-black_queen = pygame.image.load('pieces/black_queen.png')
-def draw_loc_pawn(piece):
-    return ((piece.location.x+1)*100-70,(piece.location.y+1)*100-80)
-def draw_loc_knight(piece):
-    return ((piece.location.x+1)*100-85,(piece.location.y+1)*100-95)
-def draw_loc_bishop(piece):
-    return ((piece.location.x+1)*100-80,(piece.location.y+1)*100-95)
-def draw_loc_rook(piece):
-    return ((piece.location.x+1)*100-80,(piece.location.y+1)*100-95)
-def draw_loc_queen(piece):
-    return ((piece.location.x+1)*100-80,(piece.location.y+1)*100-95)
-def draw(piece):
-    color = None 
-    white = board.white
-    black = board.black
-    if piece.color==black:
-        color = greenColor
-    else:
-        color = blueColor
-    if isinstance(piece, Pawn):
-        drawn_pawn = white_pawn if piece.color==white else black_pawn
-        windowSurfaceObj.blit(drawn_pawn, draw_loc_pawn(piece))
-    elif isinstance(piece, Knight):
-        drawn_knight = white_knight if piece.color==white else black_knight
-        windowSurfaceObj.blit(drawn_knight, draw_loc_knight(piece))
-    elif isinstance(piece, Bishop):
-        drawn_bishop = white_bishop if piece.color==white else black_bishop
-        windowSurfaceObj.blit(drawn_bishop, draw_loc_bishop(piece))
-    elif isinstance(piece, Rook):
-        drawn_rook = white_rook if piece.color==white else black_rook
-        windowSurfaceObj.blit(drawn_rook, draw_loc_rook(piece))
-    elif isinstance(piece, Queen):
-        drawn_queen = white_queen if piece.color==white else black_queen
-        windowSurfaceObj.blit(drawn_queen, draw_loc_queen(piece))
-    else:
-        pygame.draw.rect(windowSurfaceObj, color, (((piece.location.x-1)*step)+step/4,((piece.location.y-1)*step)+step/4,step/2,step/2))
+class ColorTuple(object):
+  def __init__(self):
+    self.r = 0
+    self.g = 20
+    self.b = 0
 
-board.selected = None
-greens = []
-board.turn=board.white
-def click_event(click_location):
-  pass
+class HeatedChess:
+  columns = ["A","B","C","D","E","F","G","H"] 
+  rows = [8,7,6,5,4,3,2,1]
+  whiteColor = pygame.Color(255,255,255)
+  blackColor = pygame.Color(0,0,0)
+  #PAWN
+  white_pawn = pygame.image.load('pieces/white_pawn.png')
+  black_pawn = pygame.image.load('pieces/black_pawn.png')
+  #KNIGHT
+  white_knight = pygame.image.load('pieces/white_knight.png')
+  black_knight = pygame.image.load('pieces/black_knight.png')
+  #BISHOP
+  white_bishop = pygame.image.load('pieces/white_bishop.png')
+  black_bishop = pygame.image.load('pieces/black_bishop.png')
+  #ROOK
+  white_rook = pygame.image.load('pieces/white_rook.png')
+  black_rook = pygame.image.load('pieces/black_rook.png')
+  #QUEEN
+  white_queen = pygame.image.load('pieces/white_queen.png')
+  black_queen = pygame.image.load('pieces/black_queen.png')
+  #KING
+  #TODO
 
-def click_to_loc(click_location):
-  mousex,mousey = click_location
-  #normalize from pixels
-  x = mousex/step
-  y = mousey/step   
-  # convert to chess format 
-  x=string.ascii_uppercase[x]
-  y=y+1
+  def originalPieces(self):
+    ret = {} 
+    #PAWNS
+    for col in self.columns:
+      ret["%s2"%col] = self.white_pawn
+    for col in self.columns:
+      ret["%s7"%col] = self.black_pawn
+    #ROOKS
+    ret["A1"] = self.white_rook
+    ret["H1"] = self.white_rook
+    ret["A8"] = self.black_rook
+    ret["H8"] = self.black_rook
+    #KNIGHTS
+    ret["B1"] = self.white_knight
+    ret["G1"] = self.white_knight
+    ret["B8"] = self.black_knight
+    ret["G8"] = self.black_knight
+    #BISHOPS
+    ret["C1"] = self.white_bishop
+    ret["F1"] = self.white_bishop
+    ret["C8"] = self.black_bishop
+    ret["F8"] = self.black_bishop
+    #King
+    #Queen
+    ret["D1"] = self.white_queen
+    ret["D8"] = self.black_queen
+
+    return ret 
+
+  def offsetImage(self, coords, img):
+    if img == self.white_pawn or img == self.black_pawn:
+      coords = (coords[0]+25, coords[1]+15)
+    elif img == self.white_rook or img == self.black_rook:
+      coords = (coords[0]+22, coords[1]+5)
+    elif img == self.white_knight or img == self.black_knight:
+      coords = (coords[0]+12, coords[1]+5)
+    elif img == self.white_bishop or img == self.black_bishop:
+      coords = (coords[0]+22, coords[1]+5)
+    elif img == self.white_queen or img == self.black_queen:
+      coords = (coords[0]+25, coords[1])
+
+    return coords
   
-  print "%s%s"%(x,y)
-
-  
-while True:
+  def legalSquares(self):
+    moves = set() 
+    for move in self.board.generate_legal_moves():
+      if len(str(move))>4:
+        continue
+      moves.add(str(move)[:2])
+    return moves
+       
     
-  #draw checkerboard
-  for x in xrange(0,board_size,step):
-    for y in xrange(0,board_size,step):
-      switch = whiteColor if (x/step+y/step)%2==0 else blackColor
-      pygame.draw.rect(windowSurfaceObj, switch, (x,y,step,step))
-  if greens:
-    for square in greens:
-      left = square[0]*step-step
-      top = square[1]*step-step
-      pygame.draw.rect(windowSurfaceObj, greenColor, (left,top,step,step))
-  for piece in board.get_pieces():
-    if not piece==None:
-      draw(piece)
 
-  for event in pygame.event.get():
-    if event.type == MOUSEBUTTONUP:
-      point = click_to_loc(event.pos)
-      greens = board.click(point)
+  def getRowsColumns(self):
+    rows = self.rows
+    columns = self.columns
+    if not self.whiteAtBottom:
+      rows = [z for z in reversed(self.rows)] 
+      columns = [z for z in reversed(self.columns)]
+    return rows, columns
 
-  pygame.display.update()
+  def getSquare(self, x, y):
+    """ takes in coordinates, returns a {A-H}{0-8} string representing which square was pressed """
+    rows, columns = self.getRowsColumns()
+
+    column =  x//self.step
+    row =     y//self.step
+    return "%s%s"%(columns[column],rows[row])
+
+  def getCoords(self, san):
+    """ takes in SAN (A1, H8, etc) and returns the top left corner of the corresponding square"""
+    rows, columns = self.getRowsColumns()
+    column, row = san # subtly this splits the string `san` into A and 8, for example.
+    row = int(row) # cast it to int
+    column_index = columns.index(column)
+    row_index = rows.index(row)
+    return ( column_index*self.step,row_index*self.step)
+
+  def generateMoves(self):
+    moves = defaultdict(int)
+    for move in self.board.generate_legal_moves():
+      if len(str(move))>4:
+        continue
+      dest = str(move)[-2:].upper()
+      moves[dest]+=1
+
+    return moves 
+      
+  def generateOptions(self, square):
+    moves = [] 
+    for move in self.board.generate_legal_moves():
+      if len(str(move))>4:
+        continue
+      if str(move)[:2].upper()==square:
+        moves.append(str(move)[-2:].upper())
+
+    return moves 
+      
+  def drawBlend(self, windowSurfaceObj, moves, threats):
+    results = defaultdict(ColorTuple)
+    for key, value in moves.items():
+      results[key].b=min(100+(40*value),255)
+
+    for key,value in threats.items():
+      results[key].r=min(100+(40*value),255)
+
+    for key, value in results.items():
+      x, y = self.getCoords(key)
+      pygame.draw.rect(windowSurfaceObj, pygame.Color(value.r, value.g, value.b), (x,y,self.step,self.step))
+      
+  def drawOptions(self, windowSurfaceObj, moves): 
+    for square in moves:
+      x,y = self.getCoords(square)
+      color = pygame.Color(20,200,20) 
+      pygame.draw.rect(windowSurfaceObj, color, (x,y,self.step,self.step))
+      
+      
+  def drawCheckerboard(self, windowSurfaceObj):
+    white = self.whiteColor
+    black = self.blackColor
+    for x in xrange(0,self.board_size,self.step):
+      for y in xrange(0,self.board_size,self.step):
+        switch = white if (x/self.step+y/self.step)%2==0 else black
+        pygame.draw.rect(windowSurfaceObj, switch, (x,y,self.step,self.step))
+
+  def drawPieces(self, windowSurfaceObj):
+    for square, img in self.pieces.items():
+      coords = self.getCoords(square)
+      coords = self.offsetImage(coords, img)
+      windowSurfaceObj.blit(img, coords) 
+      
+
+  def __init__(self):
+    self.whiteAtBottom = True 
+    self.board_size=801
+    self.step=100
+    self.pieces = self.originalPieces()
+
+    self.board = chess.Bitboard()
+    pygame.init()
+    windowSurfaceObj = pygame.display.set_mode((self.board_size,self.board_size))
+    pygame.display.set_caption("Chess Take 2, by Ben")
+
+    clicks = []
+    while True:
+      self.drawCheckerboard(windowSurfaceObj)
+
+      if len(clicks) == 0:
+        moves = self.generateMoves() 
+        self.board.push(None)
+        threats = self.generateMoves()
+        self.board.pop()
+        self.drawBlend(windowSurfaceObj, moves, threats)
+      if len(clicks) == 1:
+        self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
+
+      self.drawPieces(windowSurfaceObj)
+
+
+      for event in pygame.event.get():
+        if event.type == MOUSEBUTTONUP:
+          assert self.getSquare(*event.pos) == self.getSquare(*self.getCoords(self.getSquare(*event.pos)))
+          if len(clicks)==0:
+            square = self.getSquare(*event.pos) 
+            if square.lower() in self.legalSquares():
+              clicks.append(square)
+          else:
+            origin = clicks[0]
+            dest = self.getSquare(*event.pos)
+            move = chess.Move( getattr(chess, clicks[0]), getattr(chess, dest))
+            clicks = []
+            if self.board.is_legal(move):
+              self.pieces[dest] = self.pieces.pop(origin)
+              self.board.push(move)
+            
+            
+            
+
+      pygame.display.update()
+
+if __name__ == "__main__":
+  HeatedChess()
