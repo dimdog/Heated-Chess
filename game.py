@@ -115,8 +115,8 @@ class HeatedChess:
 
   def generateThreatsSupports(self):
     """ generates two dictionaries, ordered depending on who's turn it is, of the squares that each piece is either attacking or supporting as the key, and the number of pieces that can hit it as the value, partitioned on color """ 
-    white_moves = defaultdict(int)
-    black_moves = defaultdict(int)
+    white_moves = defaultdict(list)
+    black_moves = defaultdict(list)
     for row in self.rows:
       for column in self.columns:
         square_name = "%s%s"%(column, row)
@@ -124,10 +124,10 @@ class HeatedChess:
 
         for dest_square_int in self.board.attackers(chess.WHITE, target_square):
           # white_moves[chess.SQUARE_NAMES[dest_square_int].upper()]+=1
-          white_moves[square_name]+=1
+          white_moves[square_name].append(chess.SQUARE_NAMES[dest_square_int].upper())
         for dest_square_int in self.board.attackers(chess.BLACK, target_square):
           #black_moves[chess.SQUARE_NAMES[dest_square_int].upper()]+=1
-          black_moves[square_name]+=1
+          black_moves[square_name].append(chess.SQUARE_NAMES[dest_square_int].upper())
         
 
     if self.board.turn == chess.WHITE:
@@ -164,24 +164,22 @@ class HeatedChess:
     squares.update(supports.keys())
     squares.update(threats.keys())
     for key in squares:
-      threat = threats[key]
-      support = supports[key]
-      if key=="H6":
-        print "Threat:%s, support:%s"%(threat, support)
+      threat = len(threats[key])
+      support = len(supports[key])
       results[key] = float(support)/(support+threat)
 
-    print results["H6"]
     for key, value in results.items():
       self._drawProportion(windowSurfaceObj, key, value, 1.0-value)
       
 
   def _drawProportion(self, windowSurfaceObj, squareName, supportAmount, threatAmount):
       x, y = self.getCoords(squareName)
-      
+      width = 3 
       if threatAmount!=0:
-        pygame.draw.rect(windowSurfaceObj, self.redColor, (x,y,self.step,self.step*threatAmount))
+        pygame.draw.rect(windowSurfaceObj, self.redColor, (x,y,self.step,self.step*threatAmount),width)
       if supportAmount!=0:
-        pygame.draw.rect(windowSurfaceObj, self.blueColor, (x,y+(self.step*threatAmount),self.step,self.step*supportAmount))
+        borderSpacing = width if threatAmount > 0 else 0
+        pygame.draw.rect(windowSurfaceObj, self.blueColor, (x,y+(self.step*threatAmount)+borderSpacing,self.step,self.step*supportAmount-borderSpacing),width)
   
   def drawBlend(self, windowSurfaceObj, moves, threats):
     results = defaultdict(ColorTuple)
