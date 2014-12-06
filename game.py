@@ -33,6 +33,8 @@ class HeatedChess:
   white_queen = pygame.image.load('pieces/white_queen.png')
   black_queen = pygame.image.load('pieces/black_queen.png')
   #KING
+  black_king = pygame.image.load('pieces/black_king.png')
+  white_king = None
   #TODO
 
   def originalPieces(self):
@@ -58,6 +60,8 @@ class HeatedChess:
     ret["C8"] = self.black_bishop
     ret["F8"] = self.black_bishop
     #King
+    ret["E8"] = self.black_king
+    #ret["E1"] = self.white_king
     #Queen
     ret["D1"] = self.white_queen
     ret["D8"] = self.black_queen
@@ -75,6 +79,8 @@ class HeatedChess:
       coords = (coords[0]+22, coords[1]+5)
     elif img == self.white_queen or img == self.black_queen:
       coords = (coords[0]+25, coords[1])
+    elif img == self.white_king or img == self.black_king:
+      coords = (coords[0]+25, coords[1]-10)
 
     return coords
   
