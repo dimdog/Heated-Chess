@@ -113,6 +113,15 @@ class HeatedChess:
     row_index = rows.index(row)
     return ( column_index*self.step,row_index*self.step)
 
+  def getCenteredCoords(self, san):
+    """ takes in SAN (A1, H8, etc) and returns the center of the corresponding square"""
+    rows, columns = self.getRowsColumns()
+    column, row = san # subtly this splits the string `san` into A and 8, for example.
+    row = int(row) # cast it to int
+    column_index = columns.index(column)
+    row_index = rows.index(row)
+    return ( column_index*self.step+self.step/2,row_index*self.step+self.step/2)
+
   def generateThreatsSupports(self):
     """ generates two dictionaries, ordered depending on who's turn it is, of the squares that each piece is either attacking or supporting as the key, and the number of pieces that can hit it as the value, partitioned on color """ 
     white_moves = defaultdict(list)
@@ -156,6 +165,17 @@ class HeatedChess:
         moves.append(str(move)[-2:].upper())
 
     return moves 
+
+  def drawLines(self, windowSurfaceObj, supports, threats):
+    """ draws lines showing where each piece can move to and from """
+    width = 3
+    for target, sources in supports.items():
+      for source in sources:
+        pygame.draw.line(windowSurfaceObj, self.blueColor, self.getCenteredCoords(source), self.getCenteredCoords(target),width)
+
+    for target, sources in threats.items():
+      for source in sources:
+        pygame.draw.line(windowSurfaceObj, self.redColor, self.getCenteredCoords(source), self.getCenteredCoords(target), width)
       
   def drawProportional(self, windowSurfaceObj, supports, threats):
     """ draws proportionally divided squares based on power available on the square"""
@@ -234,6 +254,7 @@ class HeatedChess:
         threats, supports = self.generateThreatsSupports()
         #self.drawBlend(windowSurfaceObj, supports, threats)
         self.drawProportional(windowSurfaceObj, supports, threats)
+        self.drawLines(windowSurfaceObj, supports, threats)
       if len(clicks) == 1:
         self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
 
