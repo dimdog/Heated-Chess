@@ -236,14 +236,12 @@ class HeatedChess:
     while True:
       self.drawCheckerboard(windowSurfaceObj)
 
-      if len(clicks) == 0:
-        threats, supports = self.generateThreatsSupports()
-        #self.drawBlend(windowSurfaceObj, supports, threats)
-        self.drawProportional(windowSurfaceObj, supports, threats)
-        self.drawLines(windowSurfaceObj, supports, threats)
       if len(clicks) == 1:
         self.drawOptions(windowSurfaceObj, self.generateOptions(clicks[0]))
 
+      threats, supports = self.generateThreatsSupports()
+      #self.drawProportional(windowSurfaceObj, supports, threats)
+      self.drawLines(windowSurfaceObj, supports, threats)
       self.drawPieces(windowSurfaceObj)
 
 
@@ -262,7 +260,7 @@ class HeatedChess:
             if self.board.is_legal(move):
               self.pieces[dest] = self.pieces.pop(origin)
               self.board.push(move)
-              self.whiteAtBottom = not self.whiteAtBottom
+              #self.whiteAtBottom = not self.whiteAtBottom
             
             
             
