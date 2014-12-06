@@ -86,8 +86,6 @@ class HeatedChess:
       moves.add(str(move)[:2])
     return moves
        
-    
-
   def getRowsColumns(self):
     rows = self.rows
     columns = self.columns
@@ -123,7 +121,7 @@ class HeatedChess:
     return ( column_index*self.step+self.step/2,row_index*self.step+self.step/2)
 
   def generateThreatsSupports(self):
-    """ generates two dictionaries, ordered depending on who's turn it is, of the squares that each piece is either attacking or supporting as the key, and the number of pieces that can hit it as the value, partitioned on color """ 
+    """ generates two dictionaries, ordered depending on who's turn it is, of the squares that each piece is either attacking or supporting as the key, and a list of the squares with pieces that can hit it as the value, partitioned by color """ 
     white_moves = defaultdict(list)
     black_moves = defaultdict(list)
     for row in self.rows:
@@ -143,19 +141,6 @@ class HeatedChess:
       return black_moves, white_moves
     return white_moves, black_moves
     
-        
-
-  def generateMoves(self):
-    """ generates a dictionary of legal destinations and the number of pieces that can move there """
-    moves = defaultdict(int)
-    for move in self.board.generate_legal_moves():
-      if len(str(move))>4:
-        continue
-      dest = str(move)[-2:].upper()
-      moves[dest]+=1
-
-    return moves 
-      
   def generateOptions(self, square):
     moves = [] 
     for move in self.board.generate_legal_moves():
@@ -240,8 +225,9 @@ class HeatedChess:
     self.board_size=801
     self.step=100
     self.pieces = self.originalPieces()
-
     self.board = chess.Bitboard()
+
+  def draw(self):
     pygame.init()
     windowSurfaceObj = pygame.display.set_mode((self.board_size,self.board_size))
     pygame.display.set_caption("Chess Take 2, by Ben")
@@ -284,4 +270,5 @@ class HeatedChess:
       pygame.display.update()
 
 if __name__ == "__main__":
-  HeatedChess()
+  heatedChess = HeatedChess()
+  heatedChess.draw()
