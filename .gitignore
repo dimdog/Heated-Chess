@@ -1,2 +1,9 @@
 *.pyc
 *.swp
+webapp/source/vendor/
+.DS_Store
+webapp/.sass-cache/
+webapp/.tmp/
+webapp/node_modules/
+webapp/app
+.bowerrc

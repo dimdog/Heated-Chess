@@ -1,0 +1,22 @@
+{
+  "name": "Heated-Chess",
+  "version": "0.0.1",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-autoprefixer": "~0.2.20130806",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-concat": "^0.4.0",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-jade": "~0.8.0",
+    "grunt-contrib-sass": "~0.5.0",
+    "grunt-contrib-uglify": "^0.4.0",
+    "grunt-contrib-watch": "0.6.0",
+    "grunt-exec": "~0.4.2",
+    "grunt-execute" : "^0.2.2",
+    "grunt-filerev": "^2.3.1",
+    "grunt-replace": "^0.7.6",
+    "grunt-usemin": "^3.1.0",
+    "load-grunt-tasks": "~0.2.0",
+    "grunt-sprite-packer": "https://github.com/augustskare/grunt-sprite-packer/tarball/master"
+  }
+}

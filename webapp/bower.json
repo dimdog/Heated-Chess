@@ -1,0 +1,27 @@
+{
+  "name": "Heated-Chess",
+  "version": "0.0.0",
+  "homepage": "https://github.com/dimdog/Heated-Chess",
+  "authors": [
+    "Ben Reiter <benkreiter@gmail.com>"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "2.1.4",
+    "angular": "1.4.4",
+    "angular-route": "1.4.4",
+    "angular-cookies": "1.4.4",
+    "angular-sanitize": "1.4.4",
+    "angular-ui-router": "^0.3.1",
+  },
+  "resolutions": {
+    "angular": "1.4.4"
+  }
+}

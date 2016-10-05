@@ -1,0 +1,38 @@
+doctype 5
+html.settings(lang="en", ng-app="app")
+  head
+    base(href="")
+    link(rel="stylesheet", href="style.css")
+
+    // build:js assets/js/app.vendor.min.js
+    script(src="raw_assets/js/vendor/jquery.min.js")
+    // angular!
+    script(src="raw_assets/js/vendor/angular.js")
+    script(src="raw_assets/js/vendor/angular-cookies.js")
+    // Angular ui-router
+    script(src="raw_assets/js/vendor/angular-ui-router.js")
+    script(src="raw_assets/js/vendor/angular-sanitize.js")
+    // endbuild
+    // wake modules
+    // build:js assets/js/app.min.js
+    script(src="raw_assets/js/app.js")
+    script(src="raw_assets/js/routes.js")
+    // Services
+    script(src="raw_assets/js/board-service.js")
+    // Controllers
+    script(src="raw_assets/js/main-controller.js")
+    // endbuild
+
+    //link(rel="icon",type="image/png",href="assets/img/favicon.ico")
+
+    block title
+      title(ng-bind="pageTitle")
+
+    // Home Templates
+    //script(type="text/ng-template", id="home.html")
+    //  include home.jade
+
+  body(ng-controller="MainCtrl")
+    div(ng-repeat="col in board.columns")
+        div(ng-repeat="row in board.rows")
+            div(class={{ getSquareColor(row+column) }})
