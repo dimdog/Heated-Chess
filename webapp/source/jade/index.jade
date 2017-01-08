@@ -34,5 +34,6 @@ html.settings(lang="en", ng-app="app")
 
   body(ng-controller="MainCtrl")
     div(ng-repeat="col in board.columns")
+        br
         div(ng-repeat="row in board.rows")
-            div(class={{ getSquareColor(row+column) }})
+            div(class='{{ board.getSquareClass(row, column) }}')

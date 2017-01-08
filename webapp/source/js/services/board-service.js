@@ -14,9 +14,13 @@ app.service('$board', ['$http', '$rootScope', '$location', '$state', function($h
     $board.init = function(callback) {
         $http.get("http://localhost/api").success(function(data) {
             $board.data = $.extend({}, data);
-            console.log($board.data);
             if (callback) { callback(data); }
         });
+    };
+    $board.getSquareClass = function(row, col){
+        var row_index = $board.rows.indexOf(row);
+        var col_index = $board.columns.indexOf(col);
+        return ((row_index + col_index)%2 === 0) ? "blackSquare" : "whiteSquare";
     };
     $board.init()
     return $board;
